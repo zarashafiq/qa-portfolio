@@ -1,0 +1,108 @@
+{
+  "info": {
+    "name": "qa-portfolio API contracts",
+    "description": "Contract tests for a public REST sandbox (restful-api.dev). Mirrors the Playwright API spec so the same checks exist in a Postman/Newman runner. Run with: newman run api-tests/collection.json",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://api.restful-api.dev" },
+    { "key": "createdId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "List objects returns 200 and an array",
+      "request": { "method": "GET", "url": "{{baseUrl}}/objects" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('body is a non-empty array', () => {",
+              "  pm.expect(Array.isArray(body)).to.be.true;",
+              "  pm.expect(body.length).to.be.above(0);",
+              "});",
+              "pm.test('items have id and name', () => {",
+              "  pm.expect(body[0]).to.have.property('id');",
+              "  pm.expect(body[0]).to.have.property('name');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create object returns 200 and an id",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"qa-portfolio probe\",\"data\":{\"src\":\"newman\"}}"
+        },
+        "url": "{{baseUrl}}/objects"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('returns an id', () => pm.expect(body).to.have.property('id'));",
+              "pm.test('echoes the name', () => pm.expect(body.name).to.eql('qa-portfolio probe'));",
+              "pm.collectionVariables.set('createdId', body.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get created object round-trips",
+      "request": { "method": "GET", "url": "{{baseUrl}}/objects/{{createdId}}" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('name matches what we created', () => {",
+              "  pm.expect(pm.response.json().name).to.eql('qa-portfolio probe');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete created object cleans up",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/objects/{{createdId}}" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Missing id returns 404",
+      "request": { "method": "GET", "url": "{{baseUrl}}/objects/does-not-exist-999999" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('status is 404', () => pm.response.to.have.status(404));"]
+          }
+        }
+      ]
+    }
+  ]
+}

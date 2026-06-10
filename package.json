@@ -1,0 +1,31 @@
+{
+  "name": "qa-portfolio",
+  "version": "1.0.0",
+  "description": "QA engineering portfolio: Playwright E2E (incl. multi-user + CDP), API contract tests, and an LLM output evaluation suite.",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:eval": "tsx evals/run-evals.ts",
+    "test:api": "newman run api-tests/collection.json",
+    "lint": "tsc --noEmit",
+    "report": "playwright show-report"
+  },
+  "keywords": [
+    "qa",
+    "playwright",
+    "test-automation",
+    "llm-evaluation",
+    "ai-testing",
+    "cdp",
+    "postman"
+  ],
+  "author": "Zara Shafiq",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
